@@ -67,7 +67,7 @@ match_results <- function(){
   }
 }
 
-#match_results()
+match_results()
 
 # Team value
 # ----------
