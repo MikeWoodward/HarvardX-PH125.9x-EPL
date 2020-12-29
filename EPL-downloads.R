@@ -44,7 +44,7 @@ if (!dir.exists(values_folder)) {dir.create(values_folder)}
 # -----------------------
 match_results <- function(){
   
-  years <- seq(1993, 2020)
+  years <- seq(2000, 2020)
 
   # Remove existing files if they exist
   f <- list.files(results_folder, 
@@ -67,18 +67,17 @@ match_results <- function(){
   }
 }
 
-match_results()
+#match_results()
 
 # Team value
 # ----------
 
 team_values <- function() {
-  
   # Remove existing files if they exist
   f <- list.files(values_folder, 
                   include.dirs = FALSE, full.names = TRUE, recursive = TRUE)
   file.remove(f)
-  rm(f)  
+  rm(f)
   
   # Build up list of dates to request from site
   days <- c("01", "15")
@@ -89,11 +88,9 @@ team_values <- function() {
   odd_dates <- c("2014-07-10", "2014-10-23", "2017-06-19")
   dates <- sort(c(dates, odd_dates))
   # Select dates after "2010-10-31"
-  dates <- dates[dates > "2010-10-31"]
-  
-  base_url <- "https://www.transfermarkt.com/premier-league/marktwerteverein/wettbewerb/GB1/stichtag/%s/plus/1"
-  for (date in dates) { 
-    # Build the url
+  dates <- dates[dates > "2010-10-31"] 
+
+  download_value_league <- function(base_url, league, date) {
     url <- sprintf(base_url, date)
     # Retrieve the data
     page <- read_html(url)
@@ -117,10 +114,22 @@ team_values <- function() {
       df['Date'] <- date
       filename <- file.path(
         values_folder,
-        paste(date, '.csv', sep=''))
+        paste(league, date, '.csv', sep=''))
       write.csv(df, filename)
-    }
+    }     
   }
+  
+  premier_url <- "https://www.transfermarkt.com/premier-league/marktwerteverein/wettbewerb/GB1/stichtag/%s/plus/1"
+  championship_url <- "https://www.transfermarkt.com/championship/marktwerteverein/wettbewerb/GB2/stichtag/%s/plus/1"
+  leagueone_url <- "https://www.transfermarkt.com/leagueone/marktwerteverein/wettbewerb/GB3/stichtag/%s/plus/1"
+  leaguetwo_url <- "https://www.transfermarkt.com/leaguetwo/marktwerteverein/wettbewerb/GB4/stichtag/%s/plus/1"
+  
+  sapply(dates, function(date) {
+    download_value_league(premier_url, 'premiership', date)    
+    download_value_league(championship_url, 'championship', date)   
+    download_value_league(leagueone_url, 'leagueone', date)
+    download_value_league(leaguetwo_url, 'leaguetwo', date)    
+  })
 }
 
 team_values()
@@ -129,6 +138,8 @@ team_values()
 # ==========
 # Script duration
 script_duration <- as.numeric((proc.time() - ptm)['elapsed'])
-td <- seconds_to_period(script_duration)
-script_duration <- sprintf('%d minutes %.1f seconds', minute(td), second(td))
+script_duration <- sprintf('%d minutes %.1f seconds', 
+                           script_duration%/%60, 
+                           script_duration%%60)
 print(paste("Script duration was", script_duration))
+
