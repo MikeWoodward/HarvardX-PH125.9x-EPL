@@ -1,6 +1,11 @@
 # Harvard PH128.9x Capstone project: English Premiership prediction
 # =================================================================
 
+# Script downloads data from various websites and saves data to CSV files.
+# Note:
+# 1. Script takes 25+ minutes to run
+# 2. Running the script too often if unfair to website owners and may result 
+#    in a ban.
 
 # Housekeeping
 # ============
@@ -28,7 +33,6 @@ library(rvest)
 # Start the clock to time the script execution
 ptm <- proc.time()
 
-
 # Create the download folder structure
 data_folder = 'data_download'
 if (!dir.exists(data_folder)) {dir.create(data_folder)}
@@ -36,6 +40,8 @@ results_folder = file.path(data_folder, 'match_results')
 if (!dir.exists(results_folder)) {dir.create(results_folder)}
 values_folder = file.path(data_folder, 'team_values')
 if (!dir.exists(values_folder)) {dir.create(values_folder)}
+foreign_folder = file.path(data_folder, 'foreign_age')
+if (!dir.exists(foreign_folder)) {dir.create(foreign_folder)}
 
 # Data download
 # =============
@@ -43,8 +49,6 @@ if (!dir.exists(values_folder)) {dir.create(values_folder)}
 # Match results by season
 # -----------------------
 match_results <- function(){
-  
-  years <- seq(2000, 2020)
 
   # Remove existing files if they exist
   f <- list.files(results_folder, 
@@ -52,9 +56,12 @@ match_results <- function(){
   file.remove(f)
   rm(f)
   
-  for (year in years) {
-    season <- paste(substr(toString(year), 3, 4), 
-                    substr(toString(year +1), 3, 4), 
+  # Seasons to request
+  years <- seq(2000, 2020)
+  
+  for (year_ in years) {
+    season <- paste(substr(toString(year_), 3, 4), 
+                    substr(toString(year_ +1), 3, 4), 
                     sep="")
     url <- paste("https://www.football-data.co.uk/mmz4281/", 
                  season, 
@@ -62,7 +69,9 @@ match_results <- function(){
                  sep="")
     filename <- file.path(
       results_folder,
-      paste("match", season, '.csv', sep=''))
+      paste("results", "-",
+            "premierleague", "-",
+            sprintf("%s-%s", year_, year_+1), '.csv', sep=''))
     download.file(url, filename)
   }
 }
@@ -114,18 +123,20 @@ team_values <- function() {
       df['Date'] <- date
       filename <- file.path(
         values_folder,
-        paste(league, date, '.csv', sep=''))
-      write.csv(df, filename)
+        paste('values', '-',
+              str_remove_all(league, "-"), '-',
+              date, '.csv', sep=''))
+      write.csv(df, filename, row.names=FALSE, fileEncoding = "UTF-8")
     }     
   }
   
-  premier_url <- "https://www.transfermarkt.com/premier-league/marktwerteverein/wettbewerb/GB1/stichtag/%s/plus/1"
-  championship_url <- "https://www.transfermarkt.com/championship/marktwerteverein/wettbewerb/GB2/stichtag/%s/plus/1"
-  leagueone_url <- "https://www.transfermarkt.com/leagueone/marktwerteverein/wettbewerb/GB3/stichtag/%s/plus/1"
-  leaguetwo_url <- "https://www.transfermarkt.com/leaguetwo/marktwerteverein/wettbewerb/GB4/stichtag/%s/plus/1"
+  premier_url <- "https://www.transfermarkt.co.uk/premier-league/marktwerteverein/wettbewerb/GB1/stichtag/%s/plus/1"
+  championship_url <- "https://www.transfermarkt.co.uk/championship/marktwerteverein/wettbewerb/GB2/stichtag/%s/plus/1"
+  leagueone_url <- "https://www.transfermarkt.co.uk/leagueone/marktwerteverein/wettbewerb/GB3/stichtag/%s/plus/1"
+  leaguetwo_url <- "https://www.transfermarkt.co.uk/leaguetwo/marktwerteverein/wettbewerb/GB4/stichtag/%s/plus/1"
   
   sapply(dates, function(date) {
-    download_value_league(premier_url, 'premiership', date)    
+    download_value_league(premier_url, 'premierleague', date)    
     download_value_league(championship_url, 'championship', date)   
     download_value_league(leagueone_url, 'leagueone', date)
     download_value_league(leaguetwo_url, 'leaguetwo', date)    
@@ -133,6 +144,60 @@ team_values <- function() {
 }
 
 team_values()
+
+# Foreign players and age
+# -----------------------
+
+foreign_age <- function() {
+  # Remove existing files if they exist
+  f <- list.files(foreign_folder, 
+                  include.dirs = FALSE, full.names = TRUE, recursive = TRUE)
+  file.remove(f)
+  rm(f)  
+  
+  # Seasons to request
+  years <- seq(2000, 2020)
+  # Leagues to request
+  leagues <- c('premier-league')
+  # Base url to build actual URL from
+  base_url <- 'https://www.transfermarkt.com/%s/startseite/wettbewerb/GB1/plus/?saison_id=%s'
+  
+  for (year_ in years) {
+    for (league_ in leagues) {
+
+      url <- sprintf(base_url, league_, year_)
+      
+      # Retrieve the data
+      page <- read_html(url)
+      
+      # Remove table header and footer nodes
+      head_nodes <- page %>% html_nodes("thead")
+      foot_nodes <- page %>% html_nodes("tfoot")
+      xml_remove(head_nodes)
+      xml_remove(foot_nodes)
+      # Get the table
+      tables <- page %>% html_nodes("table")
+      foreign_table <- tables[[4]]
+      df <- foreign_table %>% html_table()
+      # Select and rename fields
+      df <- df %>% select(X3, X5, X6)
+      names(df) <- c("Team", "MeanAge", "ForeignPlayers")
+      # Add season field
+      df['Season'] <- sprintf("%s-%s", year_, year_+1)
+      # Save data
+      filename <- file.path(
+        foreign_folder,
+        paste("foreignage", "-", 
+              str_remove_all(league_, "-"), "-", 
+              year_, "-", year_+1, 
+              '.csv', sep=''))
+      write.csv(df, filename, row.names=FALSE)      
+    }
+  }  
+
+}
+
+#foreign_age()
 
 # Tidying up
 # ==========
@@ -142,4 +207,3 @@ script_duration <- sprintf('%d minutes %.1f seconds',
                            script_duration%/%60, 
                            script_duration%%60)
 print(paste("Script duration was", script_duration))
-
