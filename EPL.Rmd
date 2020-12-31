@@ -1,5 +1,5 @@
 ---
-title: "PH125.9X Capstone project - Predicting English Premiership Soccer Matches"
+title: "PH125.9X Capstone project - Predicting the results of English Premiership Soccer Matches"
 author: "Mike Woodwward"
 date: "`r format(Sys.Date(), '%Y-%m-%d')`"
 output: 
@@ -28,39 +28,47 @@ load(file="analysis/analysis.rda")
 
 ## Project goals
 
+The aim of this project was to predict English Premier League (EPL) soccer match results with an accuracy better than random guessing. The prediction target in this project means home team goals and away team goals.
+
 ## EPL background and modeling features
 
 Other authors have extensively described the origins and operation of the EPL (see for example [Robinson]), so I won't  repeat them here. I will however describe some features relevant for modeling.
 
-The league was founded by a group of clubs who wanted to both a higher revenue share of TV rights money and who wanted large TV deals [Bulter]. This commercial focus has continued over the last twenty five years, with the league becoming one of the most commercially successful sports organizations in the world [Robinson]. A key part of the league's success has been its ability to attract overseas talent, in fact, the EPL is know for the very high number of foreign players. This suggests two areas for investigation:
+The league was founded by a group of clubs who wanted a higher revenue share of TV rights money and wanted larger TV deals [Butler]. This commercial focus has continued over the last twenty-five years, with the league becoming one of the most commercially successful sports organizations in the world [Robinson]. A key part of the league's success has been its ability to attract overseas talent, in fact, the EPL is know for the very high number of foreign players. This suggests two areas for investigation:
 
-* Are financially larger clubs more successful?
+* Do financially bigger clubs win more matches?
 
 * Does having a higher number of foreign-born players lead to greater success?
 
-In common with nearly all soccer leagues worldwide, the EPL operates as the top-tier league, with a system of promotion and relegation from the league below it (now called the Champions League). Each year, several clubs are promoted and several relegated, with the rules for promotion and relegation changing over time (e.g the league dropped from 22 teams to 20 via relegation). The team that finishes top of the league are the league champions, and the top teams qualify for European competition. Finishing top and bottom of the league have substantial financial implications. European competitions are very lucrative, both from match attendance and from TV rights. Relegation means a very large drop in revenue and may cause good players to leave the club. Therefore, teams at the bottom and the top of the league near the end of the season have stronger motivations to win. This suggests another modeling factor:
+In common with nearly all soccer leagues worldwide, the EPL operates as the top-tier league, with a system of promotion and relegation from the league below it (now called the Champions League). Each year, several clubs are promoted and several relegated, with the rules for promotion and relegation changing over time (e.g at the 1994-1995 season, the league dropped from 22 teams to 20 via relegation). Finishing top and bottom of the league have substantial financial and reputational implications. The team that finishes top of the league are the league champions, and the top teams qualify for European competition. European competitions are very lucrative, both from match attendance and from TV rights. The bottom teams may be relegated, which means a very large drop in revenue and may cause good players to leave the club. Therefore, at the end of the season, teams near the top or bottom of the league may have stronger motivations to win. This suggests another modeling feature:
 
 * At the end of the season, do teams at the top and the bottom of the league play differently?
 
-Home field advantage has been extensively discussed in the literature (e.g. [Pollard], [Leard], [Thomas]). In the EPL, teams play each other twice, once at home and once away (giving 380 games for a leage of 20 teams). Because of this, if there were no home team advantage, we would expect the number of home wins to be about the same as the number of away wins.
+Home field advantage has been extensively discussed in the literature (e.g. [Pollard], [Leard], [Thomas]). In the EPL, teams play each other twice, once at home and once away (giving 380 games for a league of 20 teams). If there were no home team advantage, we would expect the number of home wins to be about the same as the number of away wins.
 
 * Is there evidence of a home team advantage?
 
-On-field fair-play has been an important issue for the EPL, and for English soccer as a whole. Players receive a yellow card as a warning, with a red card for dangerous play or rule-breaking. A player who received a red card or two yellow cards in the same game is sent off (can't play in the rest of the game) and cannot be substituted. His team has to play with one less player, a substantial disadvantage. However, yellow and red cards might also be associated with the kind of risk-taking that wins matches.
+On-field fair-play has been an important issue for the EPL, and for English soccer as a whole. Players receive a yellow card as a warning, with a red card for dangerous play or serious rule-breaking. A player who received a red card or two yellow cards in the same game is sent off (can't play in the rest of the game) and cannot be substituted. His team has to play with one less player, a substantial disadvantage. However, yellow and red cards might also be associated with the kind of risk-taking that wins matches.
 
-* Are red cards and yellow cards affect results?
+* Do the number of red cards and yellow cards affect a team's goal scoring ability?
 
 ## Prior work
 
-Mathematicians have studied gambling for hundreds of years; the whole discipline of probability theory was largely created to understand gambling [Epstein]. Unlike other areas of math, those who are successful at analyzing gambling may chose not to publish, instead becoming wealthy themselves [Mezrich, Meloche]! Despite the the disincentive to publish, researchers have released a large number of studies analyzing soccer matches.
+Mathematicians have studied gambling for hundreds of years; in fact, the whole discipline of probability theory was largely created to understand gambling [Epstein]. Unlike other areas of math, those who are successful at analyzing gambling may chose not to publish, instead becoming wealthy themselves [Mezrich, Meloche]! Despite the the disincentive to publish, researchers have released a large number of studies analyzing soccer matches.
 
-Pollard & Pollard [Pollard] Home win
+* Home field advantage has been extensively studied (e.g. [Leard], [Pollard], [Thomas], [Vergina]) and has been found to exist in many sports, including the EPL [Allen].
+
+* Dawson *et al* [Dawson] studied consistency of red and yellow cards. They found that referees penalized away teams more (which may contribute to the home team effect). Oberstone [Oberstone] found a weak link between yellow cards and team performance.
+
+* Several researchers ([Plumley], [Barros]) have examined the link between financial performance and on-field performance, but financial performance has been measured using company financial reports (e.g. incomes statements), not the transfer value of the team.
+
+* Surprisingly little has been written about seasonal effects. Allen *et al* [Allen] found a relationship betwen the size of the home advantage effect and final league position.
 
 ## Data sources and data definitions
 
 EPL data is widely available on the internet, but much of it is in summary form. I used two detailed sources.
 
-**Match results**. These came from [Football-data](https://www.football-data.co.uk). The data goes back to the foundation of the EPL in the 1992/1993 season, but the data before XXXX has fewer fields, for example, the red card data only appears from XXX onwards.  I have chosen to only use data from XXX onwards in this analysis.
+**Match results**. These came from [Football-data](https://www.football-data.co.uk). The data goes back to the foundation of the EPL in the 1992/1993 season, but the data before the 2000-2001 has fewer fields, for example, the red card data only appears from 2000-2001 onwards.  I have chosen to only use data from 2000-2001 onwards in this analysis.
 
 **Market value, team size, and foreign players**. This data comes from [TransferMarkt](https://www.transfermarkt.com/). 
 
@@ -94,63 +102,183 @@ TransferMarkt calculates team values and team sizes twice a month, but games are
 
 Using a simple join on team and season, I use the foreign player count at the start of the season for all matches in the season. If a team purchases or sells a foreign player during the season, the foreign player count will no longer be accurate. However, EPL teams are known for having a very high number of foreign players, in which case, adding or removing a small number of foreign players might have a small effect.
 
-# Data analysis
+I stored the data used for analysis in a variable called!!!!!!!!!! In the Appendix, I explain the fields used.
+
+# Data analysis and feature selection
+
+As explained above, I only used match data from 2000-2001 onwards for this analysis.
 
 ## Home field advantage
 
 If there were no home field advantage, we would expect the number of home and away wins to be roughly equal. More formally, we might expect:
 
-\[\frac{count of home wins}{count of home wins + count of away wins} \approx 0.5\]
+\[\frac{count\ of\ home\ wins}{count\ of\ home\ wins + count\ of\ away\ wins} \approx 0.5\]
 
 and the test for equivalence would be a z-test or a t-test as appropriate.
 
 Here are the results for the EPL from the 2000-2001 season onwards. The error bars are the 95% confidence interval.
 
-ADD CHART
+```{r, echo=FALSE, warning=FALSE, fig.cap="Fraction of home wins vs. Season"}
+print(plt_home_wins)
+```
 
-Even without running a formal statistical test, it's obvious there's a very strong home field advantage and therefore this is a feature I need to include in my model. Interestingly, the 2020-2021 results suggest a mechanism for home field advantage. Due to COVID-19, this season is running entirely without spectators, the stadiums are empty while matches are played. Notably, the fraction of home wins, `r home_wins_proportion_2020_2021`, is close to 0.5 (the larger error bars are because the season is only part way through at the time of analysis). It seems like that the home field advantage may be due to home spectators.
+Even without running a formal statistical test, it's obvious there's a very strong home field advantage and therefore this is a feature I need to include in my model. The magnitude of this result is consistent with the literature [Allen].
 
-The home team effect is also apparent if we look at goal difference. Goal difference is the difference between the number of goals scored by the home team and the away team. In the XXX, I've plotted the mean goal difference (over all games in the season) against the season. Clearly, home team advantage is worth about 0.35 goals, except for 2020-2021.
+Interestingly, the 2020-2021 results suggest a mechanism for home field advantage. Due to COVID-19, this season is running entirely without spectators, teams are playing in empty stadiums. Notably, the fraction of home wins, `r home_wins_proportion_2020_2021`, is close to 0.5 (the larger error bars are because the season is only part way through at the time of analysis). It seems like that the home field advantage may be due to home spectators.
 
-GOALS WORTH
+The home team effect is also apparent if we look at goal difference. Goal difference is the difference between the number of goals scored by the home team and the away team. In Figure 2, I've plotted the mean goal difference (over all games in the season) against the season. Clearly, home team advantage is worth about 0.35 goals, except for 2020-2021 (more evidence of a COVID effect).
+
+```{r, echo=FALSE, warning=FALSE, fig.cap="Mean(Home goals - away goals) vs. Season"}
+print(plt_home_goal_difference)
+```
 
 ## Team value advantage
 
-Is having a more valuable team than your opponents an advantage? 
+Is having a more valuable team than your opponents an advantage? As a reminder, team value in this project is the notional transfer value of the team as reported by TransferMarkt.
 
-For each match between teams A and B, I calculated a value difference and a goal difference. I arranged the math so that team A was always the more valuable team. The results vary by season, but they all show the same general shape, I've chosen the 2017-2018 season as a representative sample (Figure XXXX).
+For each match in each season, I calculated a value difference and a goal difference. Figure 3 shows the result, each point is a match (with an alpha of 0.3 to show where matches overlap), the straight line is a linear fit, with the gray zone a 95% confidence interval. The chart clearly shows the aggregate effect of a value difference between teams, with a £700mn difference worth about 2 goals for the more valuable team.
 
-ADD
-
-The curve fit is a linear model fit to the data. The gray shaded area is the 95% confidence interval. I've used an alpha value of 0.3 so you can more easily see higher density data, as expected, small goal differences are more common than large differences.
-
-GOALS WORTH
+```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. value difference"}
+print(plt_team_value)
+```
 
 ## Foreign players
 
 The EPL is famous for having large numbers of foreign players, [TransferMarkt](https://www.transfermarkt.co.uk/premier-league/marktwerteverein/wettbewerb/GB1) notes that about *63%* of players in the league are foreign born. The obvious question is, does having foreign born players give a team an advantage?
 
-For the 2018-2019 season, I plotted goal difference vs. the difference in foreign player count. Figure XXX shows XXXX. 
+For each match in each season, I plotted goal difference vs. the difference in foreign player count. Figure 4 shows there's a small effect. 
 
-GOALS WORTH
+```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. foreign player difference"}
+print(plt_foreign)
+```
 
-This feature is worth including in my model.
+## Mean age
 
-## Discipline
+It may be true that younger players have more energy, older players have more experience, but what about at the team level? Does the mean age of the team make a difference? For each match, I plotted the goal difference vs the difference in mean age for the teams (Figure 5). There is an effect, worth maybe a goal for a 5 year difference, to put it simply, older teams appear to be at a disadvantage. 
 
+```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. difference in mean age"}
+print(plt_age)
+```
 
+## Squad size
+
+There are league rules on the maximum size of squads, current 25 players. For the 2020-2021 season, every team has a squad of 25 players, but that hasn't always been the case. Is squad size a useful feature? I plotted goal difference against squad size difference for every match below.
+
+```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. difference in squad size"}
+print(plt_size)
+```
+
+If there is an effect, it's very small. As squad sizes are now limited to 25 and every team has a squad of 25, I've excluded squad size as a modeling feature.
 
 ## Season effects
 
+As I explained earlier, some teams at the end of the season may well face additional incentives to win. If we look at the season week, we should see the proportion of matches that ended in a draw go down as the season progresses. 
 
+(Season week effects required more data preparation than usual. It's easy to calculate a week of year, but the season typically starts in August and runs to May of the next year, meaning the week number will rollover to 1 in the first week of the new year. However, we can work out an offset and apply it to all match dates and then take the week number - this will yield season week number in a consistent way.)
 
-## COVID-19
+For each season week, I calculated the proportion of matches that were draws and plotted them in Figure 7. There's a clear trend downward as the season progresses. Looking at the absolute difference in goals scored per match, and taking a mean per season week, I have Figure 8. This clearly shows goal difference increases as the season progresses.
+
+```{r, echo=FALSE, warning=FALSE, fig.cap="Draw proportion vs. week in season"}
+print(plt_season)
+```
+
+```{r, echo=FALSE, warning=FALSE, fig.cap="Mean absolute goal difference  vs. week in season"}
+print(plt_season_magd)
+```
+
+## Discipline
+
+Are the number of red cards or yellow cards a team has a useful predictor? As the season progresses, teams will accumulate more red cards and yellow cards, so to remove season time effects, I took the mean number of red cards and yellow cards prior to the game, so for game i between teams A and B, my red card difference was:
+
+\[ \left( \frac{1}{i-1}\sum_{g=1}^{i-1} red\ cards \right)_{Team A}  - \left( \frac{1}{i-1}\sum_{g=1}^{i-1} red\ cards \right)_{Team B}\]
+
+where A team A was the team with the higher number of red cards.
+
+The plots below shows very little effect for red cards and yellow cards. Even countin the number of red/yellow cards instead of taking an average shows very little effect.
+
+```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference  vs. red card difference"}
+print(plt_red)
+```
+
+```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference  vs. yellow card difference"}
+print(plt_yellow)
+```
+
+## Points
+
+Like most soccer leagues, the EPL awards 3 points for win, 1 for a draw, and none for a loss. Each team will have a number of points before a match. Points encode a teams track record, the more successful a team is, the more points it will have. Does the difference in points before a match predict goal difference? To remove season effects, I calculated the average number of points.
+
+```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference  vs. mean point difference"}
+print(plt_points)
+```
+
+There's a strong effect. To put it simply, teams with a stronger track record tend to score more goals against teams with a weaker track record.
+
+## Feature selection
+
+My analysis has shown the following features are worth including in machine learning:
+
+* Home team
+
+* Team value difference
+
+* Foreign player count difference between teams
+
+* Mean age difference between teams
+
+* Week in season
+
+* Mean points difference
+
+But the following features are no worth including:
+
+* Team size
+
+* Red card/yellow card count.
 
 Because COVID-19 is such a disruptive event, I will exclude the 2020-2021 season from my modeling work.
 
+# Modeling
+
+# Discussion and conclusion
+
+
+# References
+
+[Allen] Mark S. Allen, Marc V. Jones, The home advantage over the first 20 seasons of the English Premier League: Effects of shirt colour, team ability and time trends, International Journal of Sport and Exercise Psychology. Vol. 12, No. 1, 10–18
+
+[Barros] Barros CP, Leach S. Analyzing the Performance of the English F.A. Premier League With an Econometric Frontier Model. Journal of Sports Economics. 2006;7(4):391-407
+
+[Butler] Robert Butler, Patrick Massey, Has Competition in the Market for
+Subscription Sports Broadcasting Benefited Consumers? The Case of the
+English Premier League, Journal of Sports Economics 
+
+[Dawson] Peter Dawson, Stephen Dobson, John Goddard, John Wilson, Are football referees really biased and inconsistent?
+Evidence on the incidence of disciplinary sanction in the English Premier League, Journal of the Royal Statistical Society: Series A (Statistics in Society), 170: 231-250
+
+[Epstein] Richard A. Epstein, The Theory of Gambling and Statistical Logic, Academic Press, 2nd Edition, 2009
+
+[Leard] Leard B, Doyle JM. The Effect of Home Advantage, Momentum, and Fighting on Winning in the National Hockey League. Journal of Sports Economics. 2011;12(5):538-560.
+
+[Mezrich] Ben Mezrich, Bringing down the house, Atria Books, 2002
+
+[Meloche] Renee Meloche, The High-Tech Gambler: The True Story of Keith Taft & His Astonishing Machines, 2012 
+
+[Oberstone] Joel Oberstone, Differentiating the Top English Premier League Football Clubs from the Rest of the Pack: Identifying the Keys to Success, Journal of Quantitative Analysis in Sports, Volume 5, Issue 3, 2009, Article 10
+
+[Plumley] Daniel James Plumley, Robert Wilson and Simon Shibli, A holistic performance assessment of English Premier League football clubs 1992-2013. Journal of Applied Sport Management, 9 (1)
+
+[Pollard] Richard Pollard and Gregory Pollard, Home advantage in soccer: a review of its existence and causes, International Journal of Soccer and Science Journal Vol. 3 No 1 2005, pp28-44
+
+[Robinson] Joshua Robinson, Jonathan Clegg, The Club: How the English Premier League Became the Wildest, Richest, Most Disruptive Force in Sports, Mariner Books, 2019
+
+[Thomas] Thomas S, Reeves C, Bell A. Home Advantage in the Six Nations Rugby Union Tournament. Perceptual and Motor Skills. 2008;106(1):113-116
+
+[Vergina] Roger C.Vergina, John J.Sosika, No place like home: an examination of the home field advantage in gambling strategies in NFL football, Journal of Economics and Business Volume 51, Issue 1, January–February 1999, Pages 21-31
+
 # Appendix
 
-Standard error of a proportion
+**Standard error of a proportion**
 
 If the proportion is $\frac{m}{n}$ where $n$ is the number of samples, then:
 
@@ -162,44 +290,6 @@ The 95% confidence interval is:
 
 \[\hat p \pm 1.96*SE\]
 
-# References
+**Fields used in data analysis**
 
-[Butler] Robert Butler, Patrick Massey, Has Competition in the Market for
-Subscription Sports Broadcasting Benefited Consumers? The Case of the
-English Premier League, Journal of Sports Economics 
-
-[Epstein] Richard A. Epstein, The Theory of Gambling and Statistical Logic, Academic Press, 2nd Edition, 2009
-
-[Leard] Leard B, Doyle JM. The Effect of Home Advantage, Momentum, and Fighting on Winning in the National Hockey League. Journal of Sports Economics. 2011;12(5):538-560.
-
-[Mezrich] Ben Mezrich, Bringing down the house, Atria Books, 2002
-
-[Meloche] Renee Meloche, The High-Tech Gambler: The True Story of Keith Taft & His Astonishing Machines, 2012 
-
-[Pollard] Richard Pollard and Gregory Pollard, Home advantage in soccer: a review of its existence and causes, International Journal of Soccer and Science Journal Vol. 3 No 1 2005, pp28-44
-
-[Robinson] Joshua Robinson, Jonathan Clegg, The Club: How the English Premier League Became the Wildest, Richest, Most Disruptive Force in Sports, Mariner Books, 2019
-
-[Thomas] Thomas S, Reeves C, Bell A. Home Advantage in the Six Nations Rugby Union Tournament. Perceptual and Motor Skills. 2008;106(1):113-116
-
-[Vergina] Roger C.Vergina, John J.Sosika, No place like home: an examination of the home field advantage in gambling strategies in NFL football, Journal of Economics and Business Volume 51, Issue 1, January–February 1999, Pages 21-31
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+ADD!!!!!

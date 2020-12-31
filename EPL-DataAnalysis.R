@@ -69,7 +69,7 @@ plt_home_wins <- home_advantage %>%
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
         aspect.ratio=0.4) +
   ggtitle("Fraction of home wins vs. season") +
-  ylab("Fraction wins that are home wins") +
+  ylab("Fraction wins home wins") +
   xlab("Season")
 print(plt_home_wins)
 
@@ -97,11 +97,16 @@ temp <- match_results %>%
                        HGD,
                        AGD)) 
 plt_team_value <- temp %>% ggplot(aes(x=deltaV, y=deltaG)) + 
-  geom_point(color='blue', alpha=0.3) + 
-  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x)  +
-  ggtitle("Goal difference vs. team value difference for season %s") +
+  geom_point(aes(color='Match'), alpha=0.3) + 
+  geom_smooth(method = "lm", se=TRUE, level=0.95, 
+              formula=y ~ x, 
+              aes(color="Linear fit")) +
+  scale_colour_manual(name="Legend", 
+                      values=c("Linear fit"="red", "Match"="blue")) +
+  ggtitle("Goal difference vs. team value difference") +
   ylab("Goal difference") +
-  xlab("Difference in team value (£ millions)")
+  xlab("Difference in team value (£ millions)") 
+
 print(plt_team_value)
 
 # Foreign player advantage
@@ -157,6 +162,8 @@ print(plt_size)
 
 # Time of season effects
 # ======================
+# Calculate the start date for each season. Work out a date offset so we can 
+# assign week numbers to the games.
 start_date <- match_results %>% 
   select(Season, Date) %>% 
   unique() %>% 
@@ -167,7 +174,9 @@ start_date <- match_results %>%
 temp <- match_results %>% left_join(start_date, by='Season') %>%
   mutate(season_week=week(Date - day_offset)) %>%
   group_by(season_week) %>%
-  summarize(draw_proportion=sum(FTR=='D')/n())
+  summarize(draw_proportion=sum(FTR=='D')/n(),
+            magd=mean(abs(FTHG-FTAG)),
+            gc=mean(FTHG+FTAG))
             
 plt_season <- temp %>% ggplot(aes(x=season_week, y=draw_proportion)) + 
   geom_point(color='blue', alpha=0.3) + 
@@ -176,6 +185,22 @@ plt_season <- temp %>% ggplot(aes(x=season_week, y=draw_proportion)) +
   ylab("Draw proportion") +
   xlab("Week in season")
 print(plt_season)
+
+plt_season_magd <- temp %>% ggplot(aes(x=season_week, y=magd)) + 
+  geom_point(color='blue', alpha=0.3) + 
+  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x)  +
+  ggtitle("Mean absolute goal difference vs. week in season") +
+  ylab("Mean absolute goal difference") +
+  xlab("Week in season")
+print(plt_season_magd)
+
+plt_season_gc <- temp %>% ggplot(aes(x=season_week, y=gc)) + 
+  geom_point(color='blue', alpha=0.3) + 
+  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x)  +
+  ggtitle("Mean goal count vs. week in season") +
+  ylab("Draw proportion") +
+  xlab("Week in season")
+print(plt_season_gc)
 
 # Discipline effects
 # ==================
@@ -258,36 +283,37 @@ away_points <- temp %>%
 points <- rbind(home_points, away_points) %>%
   arrange(Season, TeamAbbreviation, Date) %>%
   group_by(Season, TeamAbbreviation) %>%
-  mutate(PriorCumPoints=
+  mutate(r=rowid(TeamAbbreviation),
+         PriorMeanCumPoints=
            ifelse(rowid(TeamAbbreviation) > 1, 
-                  cumsum(TeamPoints)-TeamPoints,
+                  (cumsum(TeamPoints)-TeamPoints)/(r-1),
                   0)) %>%
-  select(Season, Date, TeamAbbreviation, PriorCumPoints)
+  select(Season, Date, TeamAbbreviation, PriorMeanCumPoints)
 head(points)
 
 temp <- match_results %>% 
   left_join(points,
             by=c("Season", "Date", 
                  "HomeTeamAbbreviation"="TeamAbbreviation")) %>%
-  rename(c("HomePriorCumPoints"="PriorCumPoints"))  %>% 
+  rename(c("HomePriorMeanCumPoints"="PriorMeanCumPoints"))  %>% 
   left_join(points,
             by=c("Season", "Date", 
                  "AwayTeamAbbreviation"="TeamAbbreviation")) %>%
-  rename(c("AwayPriorCumPoints"="PriorCumPoints"))
+  rename(c("AwayPriorMeanCumPoints"="PriorMeanCumPoints"))
 
 temp <- temp %>% 
-  mutate(deltaPoints=ifelse(HomePriorCumPoints > AwayPriorCumPoints,
-                            HomePriorCumPoints - AwayPriorCumPoints,
-                            AwayPriorCumPoints - HomePriorCumPoints),
-         deltaGD=ifelse(HomePriorCumPoints > AwayPriorCumPoints,
+  mutate(deltaPoints=ifelse(HomePriorMeanCumPoints > AwayPriorMeanCumPoints,
+                            HomePriorMeanCumPoints - AwayPriorMeanCumPoints,
+                            AwayPriorMeanCumPoints - HomePriorMeanCumPoints),
+         deltaGD=ifelse(HomePriorMeanCumPoints > AwayPriorMeanCumPoints,
                         HGD,
                         AGD))
 plt_points <- temp %>% ggplot(aes(x=deltaPoints, y=deltaGD)) + 
   geom_point(color='blue', alpha=0.3) + 
   geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x)  +
-  ggtitle("Goal difference vs. prior points difference") +
+  ggtitle("Goal difference vs. mean prior points difference") +
   ylab("Goal difference") +
-  xlab("Difference in prior points")
+  xlab("Difference in mean prior points")
 print(plt_points)
 
 
@@ -306,4 +332,13 @@ if (!dir.exists(analysis_folder)) {dir.create(analysis_folder)}
 save(home_wins_proportion_2020_2021, 
      plt_home_wins,
      plt_home_goal_difference,
+     plt_team_value,
+     plt_foreign,
+     plt_age,
+     plt_size,
+     plt_season,
+     plt_season_magd,
+     plt_red,
+     plt_yellow,
+     plt_points,
      file=file.path(analysis_folder, "analysis.rda"))
