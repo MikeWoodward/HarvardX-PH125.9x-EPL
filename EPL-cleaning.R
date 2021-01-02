@@ -67,7 +67,16 @@ fields <- c('Date', 'HomeTeam', 'AwayTeam',
             'HR', 'AR', 'HY', 'AY')
 
 read_match <- function(result) {
-  season <- read.csv(result)[ ,fields]
+  # Read in data
+  season <- read.csv(result)
+  # Add missing fields and fill with NA
+  missing_fields <- fields[!(fields %in% names(season))]
+  for (missing_field in missing_fields) {
+    season[,`missing_field`] <- NA
+  }
+  # Select just the fields we want
+  season <- season %>% select(fields)
+  
   # Add the season
   basename_result <- basename(result)
   basename_result_length <- nchar(basename_result)
@@ -183,8 +192,9 @@ match_results <- match_results %>%
   mutate(HGD = FTHG - FTAG,
          AGD = FTAG - FTHG)
 
-# Wriet to CSV as a manual check on data
-match_results %>% write.csv("results_value_foreign.csv", row.names = FALSE)
+# Write to CSV as a manual check on data
+match_results %>% write.csv("match_results_value_foreign.csv", 
+                            row.names = FALSE)
 
 # Tidying up
 # ==========

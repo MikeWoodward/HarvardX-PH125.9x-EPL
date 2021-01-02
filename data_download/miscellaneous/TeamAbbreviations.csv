@@ -1,6 +1,7 @@
 TeamAbbreviation,TeamName
 ARS,Arsenal
 AVA,Aston Villa
+BAR,Barnsley
 BIR,Birmingham City
 BIR,Birmingham
 BOL,Bolton Wanderers
@@ -27,6 +28,7 @@ CRY,Crystal Palace
 DER,Derby County
 DER,Derby
 EVE,Everton
+FOR,Nott'm Forest
 FUL,Fulham
 HUD,Huddersfield Town
 HUD,Huddersfield
@@ -48,12 +50,15 @@ NEW,Newcastle United
 NEW,Newcastle
 NOR,Norwich City
 NOR,Norwich
+OLD,Oldham
 POR,Portsmouth
 QPR,Queens Park Rangers
 QPR,QPR
 REA,Reading
 SHU,Sheffield United
 SHU,Sheff Utd
+SHW,Sheffield Wednesday
+SHW,Sheffield Weds
 SOU,Southampton
 STO,Stoke City
 STO,Stoke
@@ -61,6 +66,7 @@ SUN,Sunderland AFC
 SUN,Sunderland
 SWA,Swansea City
 SWA,Swansea
+SWI,Swindon
 TOT,Tottenham Hotspur
 TOT,Spurs
 TOT,Tottenham
@@ -71,5 +77,6 @@ WHU,West Ham United
 WHU,West Ham
 WIG,Wigan Athletic
 WIG,Wigan
+WIM,Wimbledon
 WLV,Wolverhampton Wanderers
 WLV,Wolves

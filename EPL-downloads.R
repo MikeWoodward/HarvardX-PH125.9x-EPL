@@ -4,7 +4,7 @@
 # Script downloads data from various websites and saves data to CSV files.
 # Note:
 # 1. Script takes 25+ minutes to run
-# 2. Running the script too often if unfair to website owners and may result 
+# 2. Running the script too often is unfair to website owners and may result 
 #    in a ban.
 
 # Housekeeping
@@ -56,8 +56,8 @@ match_results <- function(){
   file.remove(f)
   rm(f)
   
-  # Seasons to request
-  years <- seq(2000, 2020)
+  # Seasons to request (all)
+  years <- seq(1993, 2020)
   
   for (year_ in years) {
     season <- paste(substr(toString(year_), 3, 4), 
@@ -76,12 +76,13 @@ match_results <- function(){
   }
 }
 
-#match_results()
+match_results()
 
 # Team value
 # ----------
 
 team_values <- function() {
+  
   # Remove existing files if they exist
   f <- list.files(values_folder, 
                   include.dirs = FALSE, full.names = TRUE, recursive = TRUE)
@@ -91,14 +92,17 @@ team_values <- function() {
   # Build up list of dates to request from site
   days <- c("01", "15")
   months <- sprintf("%02d", seq(1, 12))
-  years <- sprintf("%4d", seq(2010, 2020))
+  years <- sprintf("%4d", seq(2010, 2021))
   temp <- expand.grid(list(years, months, days))
   dates <- paste(temp[,1], temp[,2], temp[,3], sep="-")
+  # These are dates that don't fit the pattern
   odd_dates <- c("2014-07-10", "2014-10-23", "2017-06-19")
   dates <- sort(c(dates, odd_dates))
-  # Select dates after "2010-10-31"
+  # Select dates after "2010-10-31" - no data before then
   dates <- dates[dates > "2010-10-31"] 
-
+  # Select dates before 2021-01-08 - project deadline
+  dates <- dates[dates < "2021-01-08"] 
+  
   download_value_league <- function(base_url, league, date) {
     url <- sprintf(base_url, date)
     # Retrieve the data
@@ -147,8 +151,9 @@ team_values()
 
 # Foreign players and age
 # -----------------------
-
+# Note this requires some manipulation of the HTML tables
 foreign_age <- function() {
+  
   # Remove existing files if they exist
   f <- list.files(foreign_folder, 
                   include.dirs = FALSE, full.names = TRUE, recursive = TRUE)
@@ -163,6 +168,7 @@ foreign_age <- function() {
   base_url <- 'https://www.transfermarkt.com/%s/startseite/wettbewerb/GB1/plus/?saison_id=%s'
   
   for (year_ in years) {
+    
     for (league_ in leagues) {
 
       url <- sprintf(base_url, league_, year_)
@@ -170,7 +176,8 @@ foreign_age <- function() {
       # Retrieve the data
       page <- read_html(url)
       
-      # Remove table header and footer nodes
+      # Remove table header and footer nodes - this is a 'hack' from
+      # StackOverflow to get round the limitations of rvest
       head_nodes <- page %>% html_nodes("thead")
       foot_nodes <- page %>% html_nodes("tfoot")
       xml_remove(head_nodes)
@@ -197,7 +204,7 @@ foreign_age <- function() {
 
 }
 
-#foreign_age()
+foreign_age()
 
 # Tidying up
 # ==========

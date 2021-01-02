@@ -97,6 +97,7 @@ print(plt_home_goal_difference)
 # Team value advantage
 # ====================
 temp <- match_results %>% 
+  filter(!is.na(HomeTeamValue) | !is.na(AwayTeamValue)) %>%
   mutate(deltaV=ifelse(HomeTeamValue > AwayTeamValue,
                        HomeTeamValue - AwayTeamValue,
                        AwayTeamValue - HomeTeamValue),
@@ -104,12 +105,11 @@ temp <- match_results %>%
                        HGD,
                        AGD)) 
 plt_team_value <- temp %>% ggplot(aes(x=deltaV, y=deltaG)) + 
-  geom_point(aes(color='Match'), alpha=0.3) + 
+  geom_point(color='blue', alpha=0.3) + 
   geom_smooth(method = "lm", se=TRUE, level=0.95, 
               formula=y ~ x, 
-              aes(color="Linear fit")) +
-  scale_colour_manual(name="Legend", 
-                      values=c("Linear fit"="red", "Match"="blue")) +
+              color="red",
+              fill='red') +
   ggtitle("Goal difference vs. team value difference") +
   ylab("Goal difference") +
   xlab("Difference in team value (£ millions)") 
@@ -119,6 +119,7 @@ print(plt_team_value)
 # Foreign player advantage
 # ========================
 temp <- match_results %>% 
+  filter(!is.na(HomeTeamForeignPlayers) | !is.na(AwayTeamForeignPlayers)) %>%
   mutate(deltaF=ifelse(HomeTeamForeignPlayers > AwayTeamForeignPlayers,
                        HomeTeamForeignPlayers - AwayTeamForeignPlayers,
                        AwayTeamForeignPlayers - HomeTeamForeignPlayers),
@@ -127,7 +128,9 @@ temp <- match_results %>%
                        AGD))
 plt_foreign <- temp %>% ggplot(aes(x=deltaF, y=deltaG)) + 
   geom_point(color='blue', alpha=0.3) + 
-  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x)  +
+  geom_smooth(method = "lm", 
+              se=TRUE, level=0.95, formula=y ~ x, 
+              color="red", fill='red')  +
   ggtitle("Goal difference vs. foreign player difference") +
   ylab("Goal difference") +
   xlab("Difference in foreign players")
@@ -136,6 +139,7 @@ print(plt_foreign)
 # Mean age advantage
 # ==================
 temp <- match_results %>% 
+  filter(!is.na(HomeTeamMeanAge) | !is.na(AwayTeamMeanAge)) %>%
   mutate(deltaA=ifelse(HomeTeamMeanAge > AwayTeamMeanAge,
                        HomeTeamMeanAge - AwayTeamMeanAge,
                        AwayTeamMeanAge - HomeTeamMeanAge),
@@ -144,7 +148,8 @@ temp <- match_results %>%
                        AGD))
 plt_age <- temp %>% ggplot(aes(x=deltaA, y=deltaG)) + 
   geom_point(color='blue', alpha=0.3) + 
-  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x)  +
+  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x, 
+              color='red', fill='red')  +
   ggtitle("Goal difference vs. mean age difference") +
   ylab("Goal difference") +
   xlab("Difference in mean age")
@@ -153,6 +158,7 @@ print(plt_age)
 # Squad size advantage
 # ====================
 temp <- match_results %>% 
+  filter(!is.na(HomeTeamSquadSize) | !is.na(AwayTeamSquadSize)) %>%
   mutate(deltaA=ifelse(HomeTeamSquadSize > AwayTeamSquadSize,
                        HomeTeamSquadSize - AwayTeamSquadSize,
                        AwayTeamSquadSize - HomeTeamSquadSize),
@@ -161,7 +167,8 @@ temp <- match_results %>%
                             AGD))
 plt_size <- temp %>% ggplot(aes(x=deltaA, y=deltaG)) + 
   geom_point(color='blue', alpha=0.3) + 
-  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x)  +
+  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x, 
+              color='red', fill='red')  +
   ggtitle("Goal difference vs. squad size difference") +
   ylab("Goal difference") +
   xlab("Difference in squad size")
@@ -187,7 +194,8 @@ temp <- match_results %>% left_join(start_date, by='Season') %>%
             
 plt_season <- temp %>% ggplot(aes(x=season_week, y=draw_proportion)) + 
   geom_point(color='blue', alpha=0.3) + 
-  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x)  +
+  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x, 
+              color='red', fill='red')  +
   ggtitle("Draw proportion vs. week in season") +
   ylab("Draw proportion") +
   xlab("Week in season")
@@ -195,17 +203,20 @@ print(plt_season)
 
 plt_season_magd <- temp %>% ggplot(aes(x=season_week, y=magd)) + 
   geom_point(color='blue', alpha=0.3) + 
-  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x)  +
+  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x, 
+              color='red', fill='red')  +
   ggtitle("Mean absolute goal difference vs. week in season") +
   ylab("Mean absolute goal difference") +
   xlab("Week in season")
 print(plt_season_magd)
 
+# Goal count
 plt_season_gc <- temp %>% ggplot(aes(x=season_week, y=gc)) + 
   geom_point(color='blue', alpha=0.3) + 
-  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x)  +
+  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x, 
+              color='red', fill='red')  +
   ggtitle("Mean goal count vs. week in season") +
-  ylab("Draw proportion") +
+  ylab("Goal count") +
   xlab("Week in season")
 print(plt_season_gc)
 
@@ -244,6 +255,8 @@ temp <- match_results %>%
   rename(c("AwayMPCR"="MPCR", "AwayMPCY"="MPCY"))
 
 temp <- temp %>% 
+  filter(!is.na(HomeMPCR) | !is.na(AwayMPCR)) %>%  
+  filter(!is.na(HomeMPCY) | !is.na(AwayMPCY)) %>% 
   mutate(deltaMPCR=ifelse(HomeMPCR > AwayMPCR,
                           HomeMPCR - AwayMPCR,
                           AwayMPCR - HomeMPCR),
@@ -258,14 +271,16 @@ temp <- temp %>%
                         AGD))
 plt_red <- temp %>% ggplot(aes(x=deltaMPCR, y=deltaGR)) + 
   geom_point(color='blue', alpha=0.3) + 
-  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x)  +
+  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x, 
+              color='red', fill='red')  +
   ggtitle("Goal difference vs. cumulative average red cards") +
   ylab("Goal difference") +
   xlab("Difference in cumulative average red cards")
 print(plt_red)
 plt_yellow <- temp %>% ggplot(aes(x=deltaMPCY, y=deltaGY)) + 
   geom_point(color='blue', alpha=0.3) + 
-  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x)  +
+  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x,
+              color='red', fill='red')  +
   ggtitle("Goal difference vs. cumulative average yellow cards") +
   ylab("Goal difference") +
   xlab("Difference in cumulative average yellow cards")
@@ -317,7 +332,8 @@ temp <- temp %>%
                         AGD))
 plt_points <- temp %>% ggplot(aes(x=deltaPoints, y=deltaGD)) + 
   geom_point(color='blue', alpha=0.3) + 
-  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x)  +
+  geom_smooth(method = "lm", se=TRUE, level=0.95, formula=y ~ x,
+              color='red', fill='red')  +
   ggtitle("Goal difference vs. mean prior points difference") +
   ylab("Goal difference") +
   xlab("Difference in mean prior points")
