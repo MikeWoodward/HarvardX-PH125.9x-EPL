@@ -15,11 +15,16 @@ urlcolor: blue
 knitr::opts_chunk$set(echo = TRUE)
 if(!require(tidyverse)) install.packages("tidyverse", 
                                          repos = "http://cran.us.r-project.org")
+if(!require(gridExtra)) install.packages("gridExtra", 
+                                         repos = "http://cran.us.r-project.org")
+library(tidyverse)
+library(gridExtra)
 ```
 
 ```{r, echo=FALSE, warning=FALSE}
-# Include saved
-load(file="analysis/analysis.rda")
+# Load saved data
+load(file=file.path("analysis", "analysis.rda"))
+load(file=file.path("model", "model.rda"))
 ```
 
 # Abstract
@@ -138,7 +143,7 @@ Is having a more valuable team than your opponents an advantage? As a reminder, 
 
 For each match in each season, I calculated a value difference and a goal difference. Figure 3 shows the result, each point is a match (with an alpha of 0.3 to show where matches overlap), the straight line is a linear fit, with the gray zone a 95% confidence interval. The chart clearly shows the aggregate effect of a value difference between teams, with a £700mn difference worth about 2 goals for the more valuable team.
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. value difference"}
+```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. value difference", fig.height=4}
 print(plt_team_value)
 ```
 
@@ -148,7 +153,7 @@ The EPL is famous for having large numbers of foreign players, [TransferMarkt](h
 
 For each match in each season, I plotted goal difference vs. the difference in foreign player count. Figure 4 shows there's a small effect. 
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. foreign player difference"}
+```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. foreign player difference", fig.height=4}
 print(plt_foreign)
 ```
 
@@ -156,7 +161,7 @@ print(plt_foreign)
 
 It may be true that younger players have more energy, older players have more experience, but what about at the team level? Does the mean age of the team make a difference? For each match, I plotted the goal difference vs the difference in mean age for the teams (Figure 5). There is an effect, worth maybe a goal for a 5 year difference, to put it simply, older teams appear to be at a disadvantage. 
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. difference in mean age"}
+```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. difference in mean age", fig.height=4}
 print(plt_age)
 ```
 
@@ -164,7 +169,7 @@ print(plt_age)
 
 There are league rules on the maximum size of squads, current 25 players. For the 2020-2021 season, every team has a squad of 25 players, but that hasn't always been the case. Is squad size a useful feature? I plotted goal difference against squad size difference for every match below.
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. difference in squad size"}
+```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. difference in squad size", fig.height=4}
 print(plt_size)
 ```
 
@@ -178,11 +183,13 @@ As I explained earlier, some teams at the end of the season may well face additi
 
 For each season week, I calculated the proportion of matches that were draws and plotted them in Figure 7. There's a clear trend downward as the season progresses. Looking at the absolute difference in goals scored per match, and taking a mean per season week, I have Figure 8. This clearly shows goal difference increases as the season progresses.
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Draw proportion vs. week in season"}
+```{r, echo=FALSE, warning=FALSE, fig.cap="Draw proportion vs. week in season", fig.height=4}
 print(plt_season)
 ```
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Mean absolute goal difference  vs. week in season"}
+This effect is also apparent in the mean absolute goal difference as the season progresses, meaning games are won by a larger goal margin (Figure 8).
+
+```{r, echo=FALSE, warning=FALSE, fig.cap="Mean absolute goal difference  vs. week in season", fig.height=4}
 print(plt_season_magd)
 ```
 
@@ -196,19 +203,16 @@ where A team A was the team with the higher number of red cards.
 
 The plots below shows very little effect for red cards and yellow cards. Even countin the number of red/yellow cards instead of taking an average shows very little effect.
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference  vs. red card difference"}
-print(plt_red)
-```
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference  vs. yellow card difference"}
-print(plt_yellow)
+```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference  vs. red card difference", fig.height=4}
+grid.arrange(plt_red, plt_yellow, nrow = 1)
 ```
 
 ## Points
 
 Like most soccer leagues, the EPL awards 3 points for win, 1 for a draw, and none for a loss. Each team will have a number of points before a match. Points encode a teams track record, the more successful a team is, the more points it will have. Does the difference in points before a match predict goal difference? To remove season effects, I calculated the average number of points.
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference  vs. mean point difference"}
+```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference  vs. mean point difference", fig.height=4}
 print(plt_points)
 ```
 
@@ -240,6 +244,37 @@ Because COVID-19 is such a disruptive event, I will exclude the 2020-2021 season
 
 # Modeling
 
+A soccer match result is a two-dimensional variable, it consists of a home team score and an away team score. This is known as multi-dimensional classification [Borchani] and the techniques involved go well beyond the scope of [PH125](https://www.edx.org/professional-certificate/harvardx-data-science). To tranform this into a one-dimensional problem, there are at least two approaches:
+
+* Predict goal difference rather than score. The easiest way to do this is to calculate $home\ goals - away\ goals$, however, it becomes much harder to analyze home advantage in this model because it's already factored into the target variable. This is approach is also less satisfying from a prediction view point.
+
+* Have two models, one a home goals model and one an away goals model. This will predict scores, which is more satisfying, and it also enables us to model home advantage. We can introduce a binary variable 'home' which is true for a team playing at home and false for a team playing away. The downside of this approach is I may be missing interactions between home and away teams.
+
+On balance, I decided to use two models, one for home goals and one for away goals.
+
+Goals are are integer numbers $\geq 0$, however, there is value in model predictions of real numbers. For example, if 2 away goals were scored in a match, and two models predicted 1.5 and 1.9, we would consider the 1.9 model to be better. My success criteria is minimizing a loss function, and similarly to the MovieLens project, I decided on RMSE as my loss function, where:
+\[RMSE = \sqrt{\frac{1}{N}\sum_{u,i}{(\hat y_{u,i} - y_{u,i})^2}}\] 
+where: 
+*$N$ is the number of matches, 
+* $\hat y_{i}$ is the predicted number of goals for the ith game
+* $y_{i}$ is the actual number of goals for the ith game
+
+## Holdout, test, and training data sets
+
+I created a modeling and vlidation data set by partioning the 
+
+## Baseline
+
+Using the test data set alone, I calculated mean home and mean away goals. This will be my baseline model. 
+
+* Home goals RMSE: `r RMSE_baseline_home_goals`
+
+* Away goals RMSE: `r RMSE_baseline_away_goals`
+
+Given that soccer is low scoring game, these RMSE scores are not good.
+
+
+
 # Discussion and conclusion
 
 
@@ -248,6 +283,8 @@ Because COVID-19 is such a disruptive event, I will exclude the 2020-2021 season
 [Allen] Mark S. Allen, Marc V. Jones, The home advantage over the first 20 seasons of the English Premier League: Effects of shirt colour, team ability and time trends, International Journal of Sport and Exercise Psychology. Vol. 12, No. 1, 10–18
 
 [Barros] Barros CP, Leach S. Analyzing the Performance of the English F.A. Premier League With an Econometric Frontier Model. Journal of Sports Economics. 2006;7(4):391-407
+
+[Borchani] Borchani, H., Varando, G., Bielza, C. and Larrañaga, P. (2015), A survey on multi‐output regression. WIREs Data Mining Knowl Discov, 5: 216-233, 
 
 [Butler] Robert Butler, Patrick Massey, Has Competition in the Market for
 Subscription Sports Broadcasting Benefited Consumers? The Case of the

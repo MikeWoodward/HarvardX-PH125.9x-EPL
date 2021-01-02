@@ -177,11 +177,13 @@ match_results <- match_results %>%
            "AwayTeamForeignPlayers"="ForeignPlayers"))
 
 # Add new columns
-# HGD - home team goal difference, home team goals - away team goals
+# HGD = home team goal difference, home team goals - away team goals
+# AGD = away team goal difference, away team goals - home team goals
 match_results <- match_results %>% 
   mutate(HGD = FTHG - FTAG,
          AGD = FTAG - FTHG)
 
+# Wriet to CSV as a manual check on data
 match_results %>% write.csv("results_value_foreign.csv", row.names = FALSE)
 
 # Tidying up

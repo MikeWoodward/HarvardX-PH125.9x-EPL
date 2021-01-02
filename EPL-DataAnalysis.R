@@ -41,6 +41,9 @@ load(file.path(match_folder, 'match_results.rda'))
 # Home team advantage
 # ===================
 
+# Group the matches by season and work out the number of home and away wins.
+# The home win proportion is count of home wins/ count of all win.
+
 home_advantage <- match_results %>% 
        group_by(Season) %>%
        summarize(home_wins=sum(FTR == 'H'),
@@ -55,10 +58,12 @@ home_advantage <- match_results %>%
                  .groups='keep')
 home_advantage
 
-# This number is quoted in the final report
+# This number is quoted in the final report for the 2020-2021 home
+# wind proportion
 home_wins_proportion_2020_2021 <- home_advantage %>% 
   filter(Season=='2020-2021') %>% .$proportion_home
 
+# Plot the fraction of home wins by season
 plt_home_wins <- home_advantage %>%
   ggplot(aes(x=Season, 
              y=proportion_home,
@@ -73,6 +78,8 @@ plt_home_wins <- home_advantage %>%
   xlab("Season")
 print(plt_home_wins)
 
+# Plot the home team goal difference. If there were no home team advantage,
+# we would expect this goal difference to be zero.
 plt_home_goal_difference <- home_advantage %>%
   ggplot(aes(x=Season, 
              y=m_HGD,
@@ -315,7 +322,6 @@ plt_points <- temp %>% ggplot(aes(x=deltaPoints, y=deltaGD)) +
   ylab("Goal difference") +
   xlab("Difference in mean prior points")
 print(plt_points)
-
 
 # Tidying up
 # ==========
