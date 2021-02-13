@@ -1,6 +1,0 @@
-﻿Field,Explanation
-WeekNumber,The week number of the season (starts from 1)
-AwayPriorMeanCumPoints,The points the away team has prior to the match
-HomePriorMeanCumPoints,The points the home team has prior to the match
-AwayMPCR,The mean red cards for the away team before the match
-HomeMPCR,The mean red cards for the home team before the match
