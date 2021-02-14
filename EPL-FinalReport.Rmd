@@ -38,7 +38,7 @@ My goal in this project was to forecast the results of English Premier League so
 
 The features I selected for modeling were: team transfer value, foreign player count, team mean player age, season week, mean prior goal difference, mean prior points difference, and mean prior red and yellow card difference. In the text, I explain and define these features.
 
-The nine models I developer were: naive means, generalized linear, generalized linear net, support vector machines (radial version), k-nearest neighbors, neural nets, XGB linear, XGB tree, and random forest. My success metric was minimizing the RMSE of predicted - actual goals.
+The nine models I developer were: naive means, generalized linear, generalized linear net, support vector machines (radial version), k-nearest neighbors, neural nets, XGB linear, XGB tree, and random forest. My success metric was minimizing the RMSE of (predicted - actual) goals.
 
 The best models were only a 8% improvement over naive means for RMSE, and I explain why this is so in the conclusion. For home team predictions, the best model was XGB Tree (1.152681), for away team predictions, the best model was a neural net (1.121113). These results suggest the underlying system may be non-linear.
 
@@ -66,7 +66,7 @@ Home field advantage has been extensively discussed in the literature (e.g. [Pol
 
 * Is there evidence of a home team advantage?
 
-Each of the teams in a match comes to the match with a track record of previous games won, lost or drawn. We might expect teams higher up the EPL table to beat teams lower down, and we might expect teams with a good track record of goal scoring to beat teams with a poor record.
+Each of the teams in a match comes to the match with a track record of previous games won, lost or drawn. We might expect teams higher up the EPL league table to beat teams lower down, and we might expect teams with a good track record of goal scoring to beat teams with a poor record.
 
 * Is there evidence that a team's prior performance influences the outcome of its current match?
 
@@ -136,7 +136,7 @@ dataanalysis()
 model()
 ```
 
-Note the software will install all necessary packages if they haven't already been installed. Here's a code snippet to show loading just a few libraries.
+The software will install all necessary packages if they haven't already been installed. Here's a code snippet to show loading just a few libraries.
 
 ```{r, eval=FALSE, warning=FALSE, echo=TRUE}
   # Snippet starts...
@@ -193,7 +193,7 @@ TransferMarkt calculates team values and team sizes twice a month, but matches a
 
 Using a simple join on team and season, I used the foreign player count at the start of the season for all matches in the season.
 
-The soccer season starts in August and typically runs until May of the next year. I calculated a season week using date offsets. 
+The soccer season starts in August and typically runs until May of the next year. For each match, I calculated a season week using date offsets. 
 
 The clean function in my r code performs all these functions and a few more (e.g. consistent date formats). It merges all the data into one data frame, called match_results, which it saves to an rda file that both the datanalysis and model functions use.
 
@@ -223,7 +223,7 @@ Interestingly, the 2020-2021 results suggest a mechanism for home field advantag
 
 The home effect is also apparent if we look at goal difference. Goal difference is the difference between the number of goals scored by the home team and the away team. In Figure 2b, I've plotted the mean goal difference (over all games in the season) against the season. Clearly, home team advantage is worth about 0.35 goals, except for 2020-2021 (more evidence of a COVID effect).
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Home field advantage", fig.subcap=c('Home win proportion', 'Goal difference'), out.width="50%", fig.show = "hold"}
+```{r, echo=FALSE, warning=FALSE, fig.cap="Home field advantage", fig.subcap=c('Home win proportion', 'Goal difference'), out.width="50%", fig.show = "hold", fig.height=4}
 plt_home_wins
 plt_home_goal_difference
 ```
@@ -234,7 +234,7 @@ EPL teams are well-known for spending very large sums of money buying players. I
 
 For each match in each season, I calculated a value difference and a goal difference (value difference is the difference in transfer value of the two teams and arranged so it's $most\ expensive\ team\ - \ cheaper\ team$, the goal difference is $most\ expensive\ team's\ goals - cheapest\ team's\ goals$). Figure 3 shows the result, each point is a match (with an alpha of 0.3 to show where matches overlap), the (red) straight line is a linear fit, with the light red zone a 95% confidence interval. The chart clearly shows the aggregate effect of a value difference between teams, with a £700mn difference worth about 2 goals for the more valuable team.
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. value difference", fig.height=3.5, fig.width=9}
+```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. value difference", fig.height=4, fig.width=9}
 print(plt_team_value)
 ```
 
@@ -250,7 +250,7 @@ print(plt_foreign)
 
 ### Mean age
 
-It may be true that younger players have more energy and older players have more experience, but what about at the team level? Does the mean age of the team make a difference? For each match, I plotted the goal difference vs the difference in mean age for the teams (Figure 5). There is an effect, worth about a goal for a 5 year difference. To put it simply, older teams appear to be at a disadvantage. 
+It may be true that younger players have more energy and older players have more experience, but what about at the team level? Does the mean age of the team make a difference? For each match, I plotted the goal difference vs. the difference in mean age for the teams (Figure 5). There is an effect, worth about a goal for a 5 year difference. To put it simply, older teams appear to be at a disadvantage. 
 
 ```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. difference in mean age", fig.height=3.5, fig.width=9}
 print(plt_age)
@@ -274,7 +274,7 @@ For each season week, I calculated the proportion of matches that were draws and
 
 This effect is also apparent in the mean absolute goal difference as the season progresses, meaning games are won by a slightly larger goal margin (Figure 7b). Interestingly, the number of goals scored per match doesn't change very much during the season (not shown in this report), suggesting it's the split of goals between the teams that changes.
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Week in season effects", fig.subcap=c('Draw proportion vs. week in season', 'Mean absolute goal difference  vs. week in season'), fig.show="hold", out.width="50%"}
+```{r, echo=FALSE, warning=FALSE, fig.cap="Week in season effects", fig.subcap=c('Draw proportion vs. week in season', 'Mean absolute goal difference vs. week in season'), fig.show="hold", out.width="50%"}
 print(plt_season)
 print(plt_season_magd)
 ```
@@ -304,7 +304,7 @@ $\frac{1}{i-1}\sum_{g=1}^{i-1} (red\ cards)_g$
 
 The plot below shows a small effect for yellow cards (Figure 8a), but it is there.
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Discipline effects", fig.subcap=c('Goal difference  vs. mean prior yellow card difference', 'Goal difference  vs. mean prior red card difference'), fig.height=5, fig.show="hold", out.width="50%"}
+```{r, echo=FALSE, warning=FALSE, fig.cap="Discipline effects", fig.subcap=c('Goal difference vs. mean prior yellow card difference', 'Goal difference vs. mean prior red card difference'), fig.height=5, fig.show="hold", out.width="50%"}
 plt_yellow
 plt_red
 ```
@@ -315,7 +315,7 @@ The red card effect (Figure 8b) is small, and oddly, it's a positive effect (mor
 
 Like most soccer leagues, the EPL awards 3 points for win, 1 for a draw, and none for a loss. Each team will have a number of points *before* a match. Points encode a team's track record, the more successful a team is, the more points it will have.
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference  vs. mean prior point difference", fig.height=3.5, fig.width=9}
+```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. mean prior point difference", fig.height=3.5, fig.width=9}
 print(plt_points)
 ```
 
@@ -325,7 +325,7 @@ Figure 9 shows there's a strong effect. To put it simply, teams with a stronger 
 
 If we're forecasting future goals, the best indicator is probably past goals.
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference  vs. mean prior goal difference", fig.height=3.5, fig.width=9}
+```{r, echo=FALSE, warning=FALSE, fig.cap="Goal difference vs. mean prior goal difference", fig.height=3.5, fig.width=9}
 print(plt_goals)
 ```
 
@@ -369,11 +369,11 @@ A soccer match result is a two-dimensional variable, it consists of a home team 
 
 * Goal difference between the teams. Predict the goal difference between the teams rather than match score. The easiest way to do this is to calculate $home\ goals - away\ goals$. The approach has the advantage of clearly including home field advantage. However, this is approach is less satisfying from a prediction viewpoint because it doesn't predict match scores.
 
-* Split games. In this approach, every game is split in two, with a 'Home' version and an 'Away' version. One model is trained to predict the home team score and the other model trained to predict the away team score. Unfortunately, this approach does not explicitly include home advantage, it's implicitly encoded into the other features. On the plus side, this approach makes predictions of match scores, which is more satisfying.
+* Split games. In this approach, every game is split in two, with a 'home' version and an 'away' version. One model is trained to predict the home team score and the other model trained to predict the away team score. Unfortunately, this approach does not explicitly include home advantage, it's implicitly encoded into the other features. On the plus side, this approach makes predictions of match scores, which is more satisfying.
 
 For simplicity, I chose to use the split games approach in this work.
 
-As we're trying to predict match scores and not win/lose/draw outcomes, this problem is a regression problem. This indicates that our loss function should be the RMSE, defined as:
+As I'm trying to predict match scores and not win/lose/draw outcomes, this problem is a regression problem. My loss function should be the RMSE, defined as:
 
 \[RMSE = \sqrt{\frac{1}{N}\sum_{i}{(\hat y_{i} - y_{i})^2}}\] 
 where: 
@@ -383,6 +383,8 @@ where:
 * $\hat y_{i}$ is the predicted number of goals for the ith game
 
 * $y_{i}$ is the actual number of goals for the $i$th game
+
+I will have a home team and away team RMSE value.
 
 Plainly, a wide range of factors influence EPL matches and it's not clear how they vary and interact. This suggests it may be worth trying a variety of different modeling approaches. I used several different regression model types, all using the caret package [Kuhn], except the naive mean model. All of the models are supervised learning models. Here are the approaches I chose:
 
@@ -422,9 +424,22 @@ cl <- makePSOCKcluster(cores)
 registerDoParallel(cl)
 ```
 
-Because of the large number of models, I want to keep models consistent in both what they're modeling and in terms of train control for regularization. I used a standard variable for the form argument in the caret train models. Here's the definition of the 'Away' form argument:
+Because of the large number of models and because I'm training home and away versions of the models, I want to keep models consistent in both what they're modeling and in terms of train control for regularization. I used a standard variable for the form argument in the caret train models. Here are the definitions of the 'home' and 'away' form argument:
 
 ```{r, eval=FALSE, warning=FALSE, echo=TRUE}
+# Define standard arguments for the train function. This ensures every
+# model trained with the same features.
+train_formula_home <- as.formula(FTHG ~ WeekNumber + 
+                                 AwayTeamValue + HomeTeamValue +
+                                 AwayTeamForeignPlayers + 
+                                 HomeTeamForeignPlayers +
+                                 AwayTeamMeanAge + HomeTeamMeanAge +  
+                                 AwayMPP + HomeMPP +
+                                 AwayMPCR + HomeMPCR + 
+                                 AwayMPCY + HomeMPCY +
+                                 AwayMPAG + AwayMPFG + 
+                                 HomeMPAG + HomeMPFG)
+
 train_formula_away <- as.formula(FTAG ~ WeekNumber + 
                                  AwayTeamValue + HomeTeamValue +
                                  AwayTeamForeignPlayers + 
@@ -437,7 +452,7 @@ train_formula_away <- as.formula(FTAG ~ WeekNumber +
                                  HomeMPAG + HomeMPFG)
 ```
 
-Here's the standard train control argument Note the use of cross-validation,  parallel processing, and constraining the prediction results to lie in the range 0 to 9. As Figure 1 showed, the highest number of goals scored in an EPL match in the last 30 years was 9, so this seems like a reasonable choice for an upper prediction bound.
+Here's the standard train control argument. Note the use of cross-validation, parallel processing, and constraining the prediction results to lie in the range 0 to 9. As Figure 1 showed, the highest number of goals scored in an EPL match in the last 30 years was 9, so this seems like a reasonable choice for an upper prediction bound.
 ```{r, eval=FALSE, warning=FALSE, echo=TRUE}
 train_control <- trainControl(method = "repeatedcv", 
                               number = 10, 
@@ -447,7 +462,7 @@ train_control <- trainControl(method = "repeatedcv",
                               predictionBounds = c(0, 9))
 ```
 
-For model implementation, the code looks like this (SVM model example). The variable formula_ is either the 'Home' (train_formula_home) or 'Away' (train_formula_away) version of the formula.
+For model implementation, the code looks like this (SVM model example). The variable formula_ is either the 'home' (train_formula_home) or 'away' (train_formula_away) version of the formula.
 ```{r, eval=FALSE, warning=FALSE, echo=TRUE}
 fit_svm <- train(form=formula_, 
                  method = "svmRadial",
@@ -475,7 +490,7 @@ rmse_table %>% filter(Method=='naive mean') %>%
   kable_styling(position = "center")
 ```
 
-Notice the away RMSE is lower than the home RMSE, which might suggest there's more variability in home games. 
+Notice the away RMSE is lower than the home RMSE, which might suggest there's more variability for home team results. 
 
 ## GLM
 
@@ -487,7 +502,7 @@ rmse_table %>% filter(Method=='glm') %>%
   kable_styling(position = "center")
 ```
 
-The results are an improvement over the naive means and again note the higher RMSE for home games.
+The results are an improvement over the naive means and again note the higher RMSE for the home variant.
 
 ## GLMnet
 
@@ -505,7 +520,7 @@ In the caret package, the svmRadial model has two tuning parameters, C and sigma
 
 The charts for the home and away RMSE results are similar, so I'll only show the home result for illustration. The optimal C and sigma values were in the middle of the range of values I tested. It's possible I might minimally improve RMSE by tweaking the tuning grid, but this will be expensive.
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="RMSE  vs. C and sigma for home model", fig.height=3.5, fig.width=9}
+```{r, echo=FALSE, warning=FALSE, fig.cap="RMSE vs. C and sigma for home model", fig.height=3.5, fig.width=9}
 print(plt_svm_home)
 ```
 
@@ -530,9 +545,9 @@ fit_knn <- train(form=formula_,
                  tuneGrid   = expand.grid(k = 1:40))
 ```
 
-The curve of RMSE vs k (the number of nearest neighbors) for the away team shows the result we would expect (Figure 12), the home model is very similar. I could have achieved a lower RMSE by increasing the maximum number of neighbors, however the improvement will be very small and the price will be more computational time.
+The curve of RMSE vs. k (the number of nearest neighbors) for the away team shows the result we would expect (Figure 12), the home model produces very similar results. I could have achieved a lower RMSE by increasing the maximum number of neighbors, however the improvement will be very small and the price will be more computational time.
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="RMSE  vs. k for away model", fig.height=3.5, fig.width=9}
+```{r, echo=FALSE, warning=FALSE, fig.cap="RMSE vs. k for away model", fig.height=3.5, fig.width=9}
 print(plt_knn_away)
 ```
 
@@ -544,9 +559,9 @@ rmse_table %>% filter(Method=='knn') %>%
 
 ## XGB linear and tree
 
-There are a number of tuning parameters for both model types, so many that searching for optimal tuning parameters takes time and memory. Because of the high memory consumption of these model types, I had several crashes and had to restrict the tuning space.
+There are a number of tuning parameters for both XGB tree and XGB linear model types, so many that searching for optimal tuning parameters takes time and memory. Because of the high memory consumption of these model types, I had several crashes and had to restrict the tuning space.
 
-Here's a code snippet for the xgbTree model that shows the tuning parameters. I had to restrict min_child_weight, subsample, and gamma. The other parameters I chose by trial and error, making sure that the final values were not at the ends of the ranges.
+Here's a code snippet for the xgbTree model that shows the tuning parameters. I had to restrict min_child_weight, subsample, and gamma to avoid crashes. The other parameters I chose by trial and error, making sure that the final values were not at the ends of the ranges.
 
 ```{r, eval=FALSE, warning=FALSE, echo=TRUE}
 xgbTuningGrid <- expand.grid(nrounds = seq(from=1, to=250, by=20),
@@ -567,7 +582,7 @@ fit_xgbTree <- train(form=formula_,
                      tuneGrid=xgbTuningGrid)
 ```
 
-Here are the results. The xgbTree modelis the only model that returns a lower RMSE for home matches than away matches.
+Here are the results. The xgbTree model is the only model that returns a lower RMSE for home matches than away matches.
 
 ```{r, echo=FALSE, warning=FALSE}
 rmse_table %>% filter(Method %in% c('xgbLinear', 'xgbTree')) %>%   
@@ -586,9 +601,9 @@ epl_test <- match_results %>% filter(Season=='2018-2019')
 
 I kept with the same idea of using a whole season (2018-2019) as a holdout.
 
-The chart of RMSE vs ntree followed the same pattern for the home and away models. For brevity, I'll just show the away plot. Finding ntree was extremely computationally intensive; even using multiple cores, it takes close to 24 hours to calculate an optimal ntree for the home and away variants.
+The chart of RMSE vs. ntree followed the same pattern for the home and away models. For brevity, I'll just show the away plot. Finding ntree was extremely computationally intensive; even using multiple cores, it takes close to 24 hours to calculate an optimal ntree for the home and away variants.
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="RMSE  vs. ntree", fig.height=3.5, fig.width=9}
+```{r, echo=FALSE, warning=FALSE, fig.cap="RMSE vs. ntree", fig.height=3.5, fig.width=9}
 print(plt_rf_away)
 ```
 
@@ -641,7 +656,7 @@ cat(c("\\begin{table}[ht] \\centering ",
 
 ```
 
-The home team mean prior red card data doesn't contribute to either the home or away model, but the away team red card result does. This is consistent with the literature that suggests referees penalize away teams more and consider a team's prior discipline record [Dawson]. In future work,I might consider removing mean prior red cards as a modeling features. 
+The home team mean prior red card data doesn't contribute to either the home or away model, but the away team red card result does. This is consistent with the literature that suggests referees consider the away team's prior discipline record more than the home team's [Dawson]. In future work,I might consider removing home team mean prior red cards as a modeling features. 
 
 The slightly different ordering of features suggests that different dynamics are at work for home and away teams, which is unsurprising given the existence of home field advantage.
 
@@ -651,7 +666,7 @@ In table 2, I present a summary of all RMSE results. A couple of points stand ou
 
 * None of the modeling approaches reduced the RMSE below 1. I'll explore this further in the 'Conclusion' section.
 
-* For all models except  XGB Tree, the RMSE is worse for home teams than away teams. This suggests there are features relevant for home team modeling that I haven't captured.
+* For all models except XGB Tree, the RMSE is worse for home teams than away teams. This suggests there are features relevant for home team modeling that I haven't captured.
 
 * The best model for away team prediction is neural networks, for home team prediction the best model is XGB Tree. Both of these models are non-linear.
 
@@ -663,13 +678,13 @@ rmse_table %>%
 
 # Conclusion
 
-The most important step to improve the RMSE results is to understand where and when the model results are incorrect. If we can understand where models are wrong, we can correct them or create an ensemble model, where one model corrects for the weakness of others. Fortunately, it should be possible to do this by hand because I'm using a single season as my holdout data set (380 games). Here are the areas I think are most worth investigating.
+The most important step to improve the RMSE results is to understand where and when the model results are incorrect. If I can understand where models are wrong, I can correct them or create an ensemble model, where one model corrects for the weakness of others. Fortunately, it should be possible to do this by hand because I'm using a single season as my holdout data set (380 games). Here are the areas I think are most worth investigating.
 
 * Start of season effects. I'm using several cumulative quantities as model features, for example, mean prior goals, mean prior points, and mean prior red cards. Each of these is reset to zero at the start of the season, reducing their predictive effectiveness for the first games of the season. If this is a problem, one solution is to carry over last season's results for the next season (with some special allowance for newly promoted teams).
 
-* Season effects. I did not use season as a modeling features because it increased the RMSE. However, there is evidence that from other authors of changes over time in the behavior of the EPL (see for example [Bradley]). It may be possible to model these changes in a way that does not add more noise.
+* Season effects. I didn't use season as a modeling features because it increased the RMSE. However, there is evidence that from other authors of changes over time in the behavior of the EPL (see for example [Bradley]). It may be possible to model these changes in a way that does not add more noise.
 
-* Prediction distribution. Figure 1 shows the actual distribution of results. The forecast distribution should be compared to the real distribution to check for discrepancies, for example, the model may predict 2-2 games more often than they occur. 
+* Prediction distribution. Figure 1 shows the actual distribution of match results. The forecast distribution should be compared to the real distribution to check for discrepancies, for example, the model may predict 2-2 games more often than they occur. 
 
 This project suffered from a lack of data in two areas: too few seasons to model and too few fields. The EPL started in the 1992-1993 season, but prior to that, *all* of the teams were in the old First Division and there were identical relegation rules. One way forward is to use the old First Division results, which go back over a hundred years. The availability of transfer data restricted modeling to 2010-2011 onward, but transfer fees were publicly known for a long time, even before the start of the EPL. Similar arguments apply to foreign player and other data. Finding new free data sources may be a significant effort, and may involve digitizing old records. Some free sources do have some detailed match level data, for example, the number of corners taken in each match, the players in the match, etc., but the data will require significant effort to scrape. Other new field data that may be easier to obtain include:
 
@@ -677,15 +692,15 @@ This project suffered from a lack of data in two areas: too few seasons to model
 
 * weather - it's possible that some weather conditions favor some teams. This data is available, but not easily.
 
-* injuries - if 'star' players are injured and can't play, that may well impact performance. We could infer this through the starting lineup of players in the match. Taking this idea a stage further, we could attempt a calculation of the team value based on the players on the pitch.
+* injuries - if 'star' players are injured and can't play, that may well impact performance. I could infer this through the starting lineup of players in the match. Taking this idea a stage further, I could attempt a calculation of the team value based on the players on the pitch.
 
-* league-within-a-league - several authors, for example Porter [Porter] have pointed out that the EPL seems to have a league-within-a-league of several clubs. These clubs tend to be wealthier than the others and tend to cluster at the top of the league table season after season. It might be worth adding a model feature for these teams (possibly as a hot one encoded 'superleague' field).
+* league-within-a-league - several authors, for example Porter [Porter] have pointed out that the EPL seems to have a league-within-a-league of several clubs. These clubs tend to be wealthier than the others and tend to cluster at the top of the league table season after season. It might be worth adding a model feature for these teams (possibly as a one-hot encoded 'superleague' field).
 
-The EPL is just one league. There are four fully-professional leagues in England, and obviously many more throughout the world. One solution to the lack of data is to broaden the scope of the model to more leagues and more countries, however, we may again be hampered by a lack of data and data inconsistencies across leagues.
+The EPL is just one league. There are four fully-professional leagues in England, and obviously many more throughout the world. One solution to the lack of data is to broaden the scope of the model to more leagues and more countries, however, I may again be hampered by a lack of data and data inconsistencies across leagues.
 
 The best performing home model was XGB Tree, a non-linear model. The best away model was a neural network model, which can have non-linear behavior. It may well be that soccer is a very non-linear game. If this is the case, using other non-linear modeling methods may yield better results. However, this may require moving beyond what's available in the caret package.
 
-As I stated earlier, a soccer match should be modeled as a multi-target regression model. It may be that the simple models I've used here are too simple. A good case in point is modeling home field advantage. The simple split model can't include a home field hot one encoded field (it would always be 1 for the home team and always 0 for the away team, meaning modeling home and away teams separately would ignore it). It's noticeable that model performance was worse for predicting home results.
+As I stated earlier, a soccer match should be modeled as a multi-target regression model. It may be that the simple models I've used here are too simple. A good case in point is modeling home field advantage. The simple split model can't include a home field one-hot encoded field (it would always be 1 for the home team and always 0 for the away team, meaning modeling home and away teams separately would ignore it). It's noticeable that model performance was worse for predicting home results.
 
 None of these models individually brought the RMSE down under a goal and the improvement on the naive model was only of the order of 8% or so. Other authors have used machine learning models for score prediction in the EPL [Baboota, Bilek, Bunker], with similar limited success. In these cases, they used a classification approach to predict win, loss, or draw. These models had an accuracy of about 0.56 at best.
 

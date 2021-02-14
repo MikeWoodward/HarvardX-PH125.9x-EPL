@@ -1333,26 +1333,26 @@ model <- function() {
   # Define standard arguments for the train function. This ensures every
   # model trained with the same features.
   train_formula_home <- as.formula(FTHG ~ WeekNumber + 
-                                     AwayTeamValue + HomeTeamValue +
-                                     AwayTeamForeignPlayers + 
-                                     HomeTeamForeignPlayers +
-                                     AwayTeamMeanAge + HomeTeamMeanAge +  
-                                     AwayMPP + HomeMPP +
-                                     AwayMPCR + HomeMPCR + 
-                                     AwayMPCY + HomeMPCY +
-                                     AwayMPAG + AwayMPFG + 
-                                     HomeMPAG + HomeMPFG)
+                                   AwayTeamValue + HomeTeamValue +
+                                   AwayTeamForeignPlayers + 
+                                   HomeTeamForeignPlayers +
+                                   AwayTeamMeanAge + HomeTeamMeanAge +  
+                                   AwayMPP + HomeMPP +
+                                   AwayMPCR + HomeMPCR + 
+                                   AwayMPCY + HomeMPCY +
+                                   AwayMPAG + AwayMPFG + 
+                                   HomeMPAG + HomeMPFG)
   
   train_formula_away <- as.formula(FTAG ~ WeekNumber + 
-                                     AwayTeamValue + HomeTeamValue +
-                                     AwayTeamForeignPlayers + 
-                                     HomeTeamForeignPlayers +
-                                     AwayTeamMeanAge + HomeTeamMeanAge +  
-                                     AwayMPP + HomeMPP +
-                                     AwayMPCR + HomeMPCR + 
-                                     AwayMPCY + HomeMPCY +
-                                     AwayMPAG + AwayMPFG + 
-                                     HomeMPAG + HomeMPFG)
+                                   AwayTeamValue + HomeTeamValue +
+                                   AwayTeamForeignPlayers + 
+                                   HomeTeamForeignPlayers +
+                                   AwayTeamMeanAge + HomeTeamMeanAge +  
+                                   AwayMPP + HomeMPP +
+                                   AwayMPCR + HomeMPCR + 
+                                   AwayMPCY + HomeMPCY +
+                                   AwayMPAG + AwayMPFG + 
+                                   HomeMPAG + HomeMPFG)
   
   # Train control uses cross validation. Define standard train control
   # so we have consistency across models.
